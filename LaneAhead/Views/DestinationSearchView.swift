@@ -26,7 +26,7 @@ struct DestinationSearchView: View {
         List {
             Section {
                 HStack {
-                    Image(systemName: "magnifyingglass").foregroundStyle(Theme.lime)
+                    Image(systemName: "magnifyingglass").foregroundStyle(Theme.accent)
                     TextField("地点、地址或“北京 望京花园”", text: queryBinding)
                         .submitLabel(.search).focused($focused).onSubmit { search() }
                         .accessibilityIdentifier("search.query")
@@ -44,7 +44,7 @@ struct DestinationSearchView: View {
                     }
                 }
                 if let result, result.explicit || result.fallback {
-                    Label("搜索城市：" + result.city, systemImage: "building.2").font(.caption).foregroundStyle(Theme.lime)
+                    Label("搜索城市：" + result.city, systemImage: "building.2").font(.caption).foregroundStyle(Theme.accent)
                 }
                 if !message.isEmpty { Text(message).font(.footnote).foregroundStyle(Theme.amber) }
             }
@@ -62,7 +62,7 @@ struct DestinationSearchView: View {
                                 else { search() }
                             } label: {
                                 VStack(alignment: .leading, spacing: 5) {
-                                    HStack { Text(place.name).foregroundStyle(.primary); Spacer(); Text("到达 \(place.visits) 次").font(.caption).foregroundStyle(Theme.lime) }
+                                    HStack { Text(place.name).foregroundStyle(.primary); Spacer(); Text("到达 \(place.visits) 次").font(.caption).foregroundStyle(Theme.accent) }
                                     Text(place.city + " " + place.address).font(.caption).foregroundStyle(.secondary).lineLimit(2)
                                 }
                             }
@@ -94,7 +94,7 @@ struct DestinationSearchView: View {
                             dismiss()
                         } label: {
                             HStack(spacing: 12) {
-                                Image(systemName: "mappin.circle.fill").font(.title2).foregroundStyle(Theme.lime)
+                                Image(systemName: "mappin.circle.fill").font(.title2).foregroundStyle(Theme.accent)
                                 VStack(alignment: .leading, spacing: 5) {
                                     Text(place.name).font(.headline).foregroundStyle(.primary)
                                     Text(place.address).font(.caption).foregroundStyle(.secondary)

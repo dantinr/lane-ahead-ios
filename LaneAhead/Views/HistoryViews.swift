@@ -6,7 +6,7 @@ struct MyView: View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("走过的路，留在这里。").font(.title2.bold())
+                    Text("走过的路，留在这里。").font(.system(.title2, design: .rounded, weight: .black))
                     HStack(spacing: 30) {
                         summary("导航", app.snapshot.trips.count)
                         summary("已到达", app.snapshot.trips.filter { $0.status == .arrived }.count)
@@ -35,7 +35,7 @@ struct MyView: View {
     }
     private func summary(_ label: String, _ value: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("\(value)").font(.system(size: 28, weight: .semibold, design: .rounded)).foregroundStyle(Theme.lime)
+            Text("\(value)").font(.system(size: 28, weight: .semibold, design: .rounded)).foregroundStyle(Theme.accent)
             Text(label).font(.caption).foregroundStyle(Theme.muted)
         }
     }
@@ -58,7 +58,7 @@ struct TripHistoryView: View {
                 VStack(alignment: .leading, spacing: 9) {
                     HStack {
                         Text(trip.destination).font(.headline)
-                        Spacer(); Text(trip.status.label).font(.caption).foregroundStyle(trip.status == .arrived ? Theme.lime : Theme.amber)
+                        Spacer(); Text(trip.status.label).font(.caption).foregroundStyle(trip.status == .arrived ? Theme.accent : Theme.amber)
                     }
                     Text(trip.address).font(.caption).foregroundStyle(.secondary)
                     Text("出发：" + trip.startedAt.formatted(date: .numeric, time: .shortened)).font(.caption)
@@ -89,7 +89,7 @@ struct LaneRecordsView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Picker("记录范围", selection: $dueOnly) { Text("全部").tag(false); Text("待更新").tag(true) }.pickerStyle(.segmented)
                 Text("共 \(app.snapshot.lanes.count) 条 · 待更新 \(app.snapshot.lanes.filter { $0.needsRefresh(at: Date()) }.count) 条")
-                    .font(.subheadline).foregroundStyle(Theme.lime)
+                    .font(.subheadline).foregroundStyle(Theme.accent)
                 Text("长期保存在本机，满 3 个月建议更新。道路方向不代表完整物理路口清单。")
                     .font(.caption).foregroundStyle(Theme.muted)
                 if records.isEmpty {
@@ -103,7 +103,7 @@ struct LaneRecordsView: View {
                         HStack {
                             Text(record.recordedAt, format: .dateTime.year().month().day().hour().minute())
                             Spacer()
-                            Text(record.needsRefresh(at: Date()) ? "待更新" : "历史参考")
+                            Text(record.needsRefresh(at: Date()) ? "待更新" : "历史参考").fontWeight(.bold)
                         }.font(.caption).foregroundStyle(Theme.amber)
                     }
                 }

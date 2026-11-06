@@ -5,7 +5,10 @@ final class LaneAheadUITests: XCTestCase {
     @MainActor func testDemoPreviewSwitchAndUnknownData() {
         let app = XCUIApplication(); app.launch()
         let demo = app.buttons["home.demo"]
-        XCTAssertTrue(demo.waitForExistence(timeout: 10)); demo.tap()
+        XCTAssertTrue(demo.waitForExistence(timeout: 10))
+        let home = XCTAttachment(screenshot: app.screenshot()); home.name = "home"; home.lifetime = .keepAlways; add(home)
+        if !demo.isHittable { app.swipeUp() }
+        demo.tap()
         XCTAssertTrue(app.staticTexts["车道演示"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["虚构演示"].firstMatch.exists)
         app.buttons["3 个"].tap(); XCTAssertTrue(app.buttons["2 个"].exists)

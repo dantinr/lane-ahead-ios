@@ -60,6 +60,16 @@ Core Motion 的 `userAcceleration` 单位为 g，转换为 m/s² 后进入 G 值
 
 构建与测试日志位于本机 `/private/tmp/lane-ios-*.log`；XCUITest 结果保存在被忽略的 `build/FinalUIValidation.xcresult`。
 
+## 0.1.1 波普主题
+
+统一采用浅色波普风：奶油白背景、电光蓝主操作、亮黄与洋红装饰、青色与淡紫工具卡片，搭配粗黑描边、无模糊硬阴影与静态漫画网点。图标同样由代码重新绘制，可运行 `swift scripts/generate-icon.swift` 复现。
+
+实时推荐以蓝底白箭头突出，历史参考以黄底黑箭头突出，来源、观测日期与待更新标记继续显示文字。混合车道只突出推荐分支。装饰图形不参与地图触摸，不加入闪烁或持续动画。
+
+两项既有 XCUITest 在新主题下通过，覆盖车道数量切换、缺失状态、工具与历史入口；人工检查首页、演示与工具页截图的文字和对比度。模拟器与真机签名构建通过。README 的三张截图已同步更新。未修改车道、搜索或传感器计算规则，也未将界面验证等同于真实道路验证。
+
+本次界面结果位于 `build/PopFinalUIValidation.xcresult`，构建日志位于本机 `/private/tmp/lane-ios-pop-*.log`。
+
 ## 官方接口依据
 
 - [高德 iOS 导航 SDK 下载](https://lbs.amap.com/api/ios-navi-sdk/download)：固定使用导航 11.3.100、无 IDFA 基础库 1.9.4。

@@ -6,15 +6,18 @@ struct ToolsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text("感受每一次转向。").font(.title2.bold())
+                HStack {
+                    Text("感受每一次转向。").font(.system(.title2, design: .rounded, weight: .black))
+                    Spacer(); PopBadge(title: "实时测量", fill: Theme.yellow).rotationEffect(.degrees(3))
+                }
                 Text("实时传感器 · 数据仅在本次测量中保留")
                     .font(.caption).foregroundStyle(Theme.muted)
-                Card {
+                Card(fill: Theme.lavender) {
                     HStack { Label("驾驶 G 值", systemImage: "gauge.with.dots.needle.50percent").font(.headline); Spacer(); Text("水平合成").font(.caption).foregroundStyle(Theme.muted) }
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text(motion.g.valid ? String(format: "%.2f", motion.g.total) : "--")
-                            .font(.system(size: 64, weight: .light, design: .rounded)).monospacedDigit()
-                        Text("g").font(.title2).foregroundStyle(Theme.lime)
+                            .font(.system(size: 64, weight: .black, design: .rounded)).italic().monospacedDigit()
+                        Text("g").font(.title2.bold()).foregroundStyle(Theme.accent)
                         Spacer()
                         VStack(alignment: .trailing, spacing: 10) {
                             metric(motion.g.longitudinal >= 0 ? "加速" : "刹车", motion.g.longitudinal)
@@ -22,51 +25,52 @@ struct ToolsView: View {
                         }
                     }
                     Text(motion.g.status).font(.caption).foregroundStyle(Theme.muted)
-                    if motion.g.calibrating { ProgressView(value: motion.g.calibrationProgress).tint(Theme.lime) }
+                    if motion.g.calibrating { ProgressView(value: motion.g.calibrationProgress).tint(Theme.accent) }
                     HStack {
                         Text(String(format: "峰值  加速 %.2f · 刹车 %.2f · 横向 %.2f · 合成 %.2f g",
                             motion.g.peakAcceleration, motion.g.peakBraking, motion.g.peakLateral, motion.g.peakTotal))
                             .font(.caption2).foregroundStyle(Theme.muted).fixedSize(horizontal: false, vertical: true)
                     }
                     HStack {
-                        Button("停车校准") { calibration = true }.buttonStyle(.borderedProminent).foregroundStyle(Theme.background)
+                        Button("停车校准") { calibration = true }.buttonStyle(PopButtonStyle(fill: Theme.yellow, compact: true))
                             .disabled(!motion.g.available).accessibilityIdentifier("tools.calibrate")
                         Spacer()
-                        Button("重置峰值") { motion.resetPeaks() }.font(.caption).buttonStyle(.bordered)
+                        Button("重置峰值") { motion.resetPeaks() }.font(.caption.bold()).buttonStyle(PopButtonStyle(fill: Theme.card, compact: true))
                     }
                 }
-                Card {
+                Card(fill: Theme.cyan) {
                     Label("磁北指南针", systemImage: "safari").font(.headline)
                     HStack(spacing: 24) {
                         ZStack {
-                            Circle().stroke(Theme.muted.opacity(0.2), lineWidth: 1)
+                            Circle().fill(Theme.card).overlay { Circle().strokeBorder(Theme.ink, lineWidth: 2) }
                             ForEach(0..<12) { i in
-                                Rectangle().fill(Theme.muted.opacity(0.5)).frame(width: 1, height: i % 3 == 0 ? 12 : 6)
+                                Rectangle().fill(Theme.ink).frame(width: i % 3 == 0 ? 2 : 1, height: i % 3 == 0 ? 12 : 6)
                                     .offset(y: -69).rotationEffect(.degrees(Double(i) * 30))
                             }
                             if motion.compass.valid {
                                 Image(systemName: "location.north.fill").font(.system(size: 58))
-                                    .foregroundStyle(Theme.lime).rotationEffect(.degrees(motion.compass.rotation))
+                                    .foregroundStyle(Theme.accent).rotationEffect(.degrees(motion.compass.rotation))
                             } else { Text("--").font(.title).foregroundStyle(Theme.muted) }
                         }.frame(width: 150, height: 150).accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(motion.compass.valid ? "\(Int(motion.compass.heading))°" : "--°").font(.system(size: 35, weight: .medium, design: .rounded)).monospacedDigit()
-                            Text(motion.compass.valid ? motion.compass.direction : "等待方向").foregroundStyle(Theme.lime)
+                            Text(motion.compass.valid ? "\(Int(motion.compass.heading))°" : "--°").font(.system(size: 35, weight: .black, design: .rounded)).monospacedDigit()
+                            Text(motion.compass.valid ? motion.compass.direction : "等待方向").foregroundStyle(Theme.accent)
                             Text(motion.compass.reference).font(.caption2).foregroundStyle(Theme.muted)
                         }
                     }.frame(maxWidth: .infinity)
                     Text(motion.compass.status).font(.caption).foregroundStyle(Theme.muted)
                 }
-                Card {
+                Card(fill: Theme.yellow) {
                     Label("双轴水平仪", systemImage: "level").font(.headline)
                     ZStack {
-                        Circle().fill(Theme.background).overlay(Circle().stroke(Theme.muted.opacity(0.2)))
+                        Circle().fill(Theme.card).overlay(Circle().stroke(Theme.ink, lineWidth: 2))
                         Circle().stroke(Theme.muted.opacity(0.18)).padding(40)
                         Rectangle().fill(Theme.muted.opacity(0.2)).frame(height: 1)
                         Rectangle().fill(Theme.muted.opacity(0.2)).frame(width: 1)
                         if motion.level.valid {
-                            Circle().fill(motion.level.level ? Theme.lime : Theme.amber).frame(width: 34, height: 34)
-                                .shadow(color: Theme.lime.opacity(0.2), radius: 12)
+                            Circle().fill(motion.level.level ? Theme.accent : Theme.pink).frame(width: 34, height: 34)
+                                .overlay { Circle().strokeBorder(Theme.ink, lineWidth: 2) }
+                                .shadow(color: Theme.ink, radius: 0, x: 2, y: 2)
                                 .offset(x: motion.level.bubbleX * 78, y: motion.level.bubbleY * 78)
                         } else { Text("--").font(.title).foregroundStyle(Theme.muted) }
                     }.frame(width: 210, height: 210).frame(maxWidth: .infinity).accessibilityHidden(true)

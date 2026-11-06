@@ -12,12 +12,14 @@ struct LaneStrip: View {
                         else {
                             ForEach(lane.directions, id: \.self) { arrow in
                                 Text(arrow.rawValue).font(.system(size: 25, weight: .bold))
-                                    .foregroundStyle(lane.recommended.contains(arrow) ? (history ? Theme.amber : Theme.lime) : Theme.muted.opacity(0.6))
+                                    .foregroundStyle(lane.recommended.contains(arrow) ? (history ? Theme.ink : Color.white) :
+                                        (!history && !lane.recommended.isEmpty ? Color.white.opacity(0.7) : Theme.muted))
                             }
                         }
                     }
                     .padding(.horizontal, 9).frame(minWidth: 38, minHeight: 42)
-                    .background(lane.recommended.isEmpty ? Color.white.opacity(0.04) : (history ? Theme.amber : Theme.lime).opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                    .background(lane.recommended.isEmpty ? Theme.background : (history ? Theme.yellow : Theme.accent), in: RoundedRectangle(cornerRadius: 8))
+                    .overlay { RoundedRectangle(cornerRadius: 8).strokeBorder(Theme.ink, lineWidth: 1.5) }
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(lane.special.isEmpty ? lane.directions.map(\.rawValue).joined(separator: "、") : lane.special)
                     .accessibilityValue(lane.recommended.isEmpty ? "未推荐" : "推荐" + lane.recommended.map(\.rawValue).joined(separator: "、"))
@@ -36,24 +38,27 @@ struct LanePanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Label("前方车道", systemImage: "arrow.triangle.branch").font(.headline)
+                Label("前方车道", systemImage: "arrow.triangle.branch").font(.system(.headline, design: .rounded, weight: .black))
                 Spacer()
                 if expanded {
-                    Button("\(count) 个") { count = count == 3 ? 2 : 3 }.font(.caption.bold()).buttonStyle(.bordered)
+                    Button("\(count) 个") { count = count == 3 ? 2 : 3 }.font(.caption.bold())
+                        .buttonStyle(PopButtonStyle(fill: Theme.cyan, compact: true))
                 }
                 Button { expanded.toggle() } label: { Image(systemName: expanded ? "chevron.up" : "chevron.down") }
+                    .foregroundStyle(Theme.ink)
                     .accessibilityLabel(expanded ? "收起车道面板" : "展开车道面板")
             }
             if expanded {
                 ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
                     VStack(alignment: .leading, spacing: 7) {
                         HStack {
-                            Text("\(index + 1)").font(.caption.bold()).foregroundStyle(Theme.background)
-                                .frame(width: 22, height: 22).background(Theme.lime, in: Circle())
+                            Text("\(index + 1)").font(.caption.bold()).foregroundStyle(Theme.ink)
+                                .frame(width: 24, height: 24).background(Theme.yellow, in: Circle())
+                                .overlay { Circle().strokeBorder(Theme.ink, lineWidth: 1.5) }
                             Text(Theme.distance(row.distance) + " · " + row.point.action).font(.subheadline.bold())
                             Spacer(minLength: 2)
-                            Text(row.source.rawValue).font(.system(size: 10, weight: .medium))
-                                .foregroundStyle(row.source == .history ? Theme.amber : Theme.muted)
+                            Text(row.source.rawValue).font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(row.source == .history ? Theme.amber : row.source == .live ? Theme.accent : Theme.muted)
                         }
                         Text(row.point.road).font(.caption).foregroundStyle(Theme.muted).lineLimit(1)
                         if let observation = row.observation {
@@ -74,7 +79,7 @@ struct LanePanel: View {
                 Text(status).font(.caption2).foregroundStyle(Theme.muted).fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(17).background(Theme.card.opacity(0.97), in: RoundedRectangle(cornerRadius: 22))
+        .padding(17).popSurface()
     }
 }
 
@@ -88,24 +93,24 @@ struct DemoView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
-                    Text("先看清，再选道。").font(.title2.bold())
-                    Spacer(); Text("虚构演示").font(.caption.bold()).padding(8).background(Theme.amber.opacity(0.12), in: Capsule()).foregroundStyle(Theme.amber)
+                    Text("先看清，再选道。").font(.system(.title2, design: .rounded, weight: .black))
+                    Spacer(); PopBadge(title: "虚构演示", fill: Theme.pink).rotationEffect(.degrees(3))
                 }
                 Text("这是一条虚构路线，不代表真实道路，也不会写入车道或导航历史。")
                     .font(.subheadline).foregroundStyle(Theme.muted)
                 LanePanel(rows: DemoScenario.rows(traveled: traveled, count: count, missing: missing),
                     status: traveled >= 1_650 ? "演示引导点已通过" : "虚构路线 · 车道由左向右排列", count: $count)
-                Card {
-                    HStack { Text("路线进度").font(.headline); Spacer(); Text(Theme.distance(traveled)).monospacedDigit().foregroundStyle(Theme.lime) }
+                Card(fill: Theme.cyan) {
+                    HStack { Text("路线进度").font(.headline); Spacer(); Text(Theme.distance(traveled)).monospacedDigit().foregroundStyle(Theme.accent) }
                     Slider(value: $traveled, in: 0...DemoScenario.total).accessibilityLabel("演示路线进度")
                     HStack {
                         Button(playing ? "暂停" : "自动回放", systemImage: playing ? "pause.fill" : "play.fill") {
                             if traveled >= DemoScenario.total { traveled = 0 }; playing.toggle()
-                        }.buttonStyle(.bordered)
+                        }.buttonStyle(PopButtonStyle(fill: Theme.yellow, compact: true))
                         Spacer()
                         Button("下一引导点") {
                             traveled = min(DemoScenario.total, ([420.0, 760, 1_180, 1_650].first { $0 > traveled } ?? DemoScenario.total) + 1)
-                        }.buttonStyle(.bordered)
+                        }.buttonStyle(PopButtonStyle(fill: Theme.card, compact: true))
                     }
                     Toggle("演示缺少车道数据", isOn: $missing).font(.subheadline)
                     Button("重新开始") { traveled = 0; playing = false }.font(.subheadline)

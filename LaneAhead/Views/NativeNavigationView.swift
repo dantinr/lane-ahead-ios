@@ -12,11 +12,12 @@ struct NativeNavigationView: View {
                 if let navigation = app.navigation { ServiceMap(view: navigation.view).ignoresSafeArea(edges: .bottom) }
                 VStack(spacing: 0) {
                     HStack {
-                        Button { exit = true } label: { Label(app.navigating ? "结束" : "返回", systemImage: "xmark").font(.subheadline.bold()).padding(10).background(Theme.background.opacity(0.95), in: Capsule()) }
+                        Button { exit = true } label: { Label(app.navigating ? "结束" : "返回", systemImage: "xmark").font(.subheadline.bold()) }
+                            .buttonStyle(PopButtonStyle(fill: Theme.card, compact: true))
                         Spacer()
                         if app.navigating {
-                            Text("\(Int(app.speed)) km/h").font(.subheadline.monospacedDigit()).padding(10)
-                                .background(Theme.background.opacity(0.95), in: Capsule())
+                            Text("\(Int(app.speed)) km/h").font(.subheadline.bold().monospacedDigit()).padding(10)
+                                .popSurface(Theme.yellow, radius: 12, shadow: 3)
                         }
                     }.padding(.horizontal, 16).padding(.top, 8)
                     Spacer()
@@ -33,8 +34,9 @@ struct NativeNavigationView: View {
                                         Text(motion.g.status).font(.caption2).foregroundStyle(Theme.muted)
                                     }
                                     Spacer()
-                                    Button("停车校准") { showCalibration = true }.font(.caption.bold()).buttonStyle(.bordered)
-                                }.padding(14).background(Theme.card, in: RoundedRectangle(cornerRadius: 16))
+                                    Button("停车校准") { showCalibration = true }.font(.caption.bold())
+                                        .buttonStyle(PopButtonStyle(fill: Theme.yellow, compact: true))
+                                }.padding(14).popSurface(Theme.card, radius: 16, shadow: 3)
                                 Text(app.storageError.isEmpty ? app.diagnostics.reason : app.storageError)
                                     .font(.caption2).foregroundStyle(Theme.amber)
                             }
@@ -56,8 +58,8 @@ struct NativeNavigationView: View {
                                         Spacer()
                                         Image(systemName: app.selectedRoute == route.id ? "checkmark.circle.fill" : "circle")
                                     }
-                                    .foregroundStyle(.white).padding(14)
-                                    .background(app.selectedRoute == route.id ? Theme.lime.opacity(0.13) : Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
+                                    .foregroundStyle(Theme.ink).padding(14)
+                                    .popSurface(app.selectedRoute == route.id ? Theme.cyan : Theme.card, radius: 14, shadow: 3)
                                 }.disabled(app.starting || app.arrived)
                             }
                             if !app.arrived {
@@ -67,6 +69,7 @@ struct NativeNavigationView: View {
                             } else { PrimaryButton(title: "返回首页", icon: "house") { app.closeNavigation() } }
                         }
                         .padding(22).background(Theme.background, in: UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24))
+                        .overlay(alignment: .top) { Rectangle().fill(Theme.ink).frame(height: 2) }
                     }
                 }
             }

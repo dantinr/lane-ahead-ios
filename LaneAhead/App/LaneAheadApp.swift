@@ -9,8 +9,9 @@ struct LaneAheadApp: App {
             RootView()
                 .environmentObject(model)
                 .environmentObject(model.motion)
-                .tint(Theme.lime)
-                .preferredColorScheme(.dark)
+                .tint(Theme.accent)
+                .foregroundStyle(Theme.ink)
+                .preferredColorScheme(.light)
                 .onChange(of: phase) { _, value in model.setForeground(value == .active) }
         }
     }

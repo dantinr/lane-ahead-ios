@@ -8,6 +8,8 @@ LaneAhead 鸿蒙版的原生 iPhone 实现。SwiftUI 页面、高德 iOS 导航 
 
 ## 界面预览
 
+默认采用波普主题：奶油白底、电光蓝、亮黄与洋红色块，搭配漫画网点、粗黑描边和硬阴影。实时车道使用蓝色推荐，历史车道使用黄色参考，并保留来源文字。
+
 | 首页 | 车道演示 | 驾驶工具 |
 | :---: | :---: | :---: |
 | <img src="docs/images/home.png" alt="LaneAhead iOS 首页的首次使用引导与车道演示入口" width="260"> | <img src="docs/images/lane-preview-demo.png" alt="虚构路线的前方车道预览、推荐方向与缺失车道状态" width="260"> | <img src="docs/images/driving-tools.png" alt="驾驶 G 值与磁北指南针在模拟器中的传感器不可用状态" width="260"> |
