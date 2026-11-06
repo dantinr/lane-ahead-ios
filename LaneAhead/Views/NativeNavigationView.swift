@@ -1,0 +1,82 @@
+import SwiftUI
+
+struct NativeNavigationView: View {
+    @EnvironmentObject private var app: AppModel
+    @EnvironmentObject private var motion: MotionService
+    @State private var exit = false
+    @State private var showCalibration = false
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Theme.background.ignoresSafeArea()
+                if let navigation = app.navigation { ServiceMap(view: navigation.view).ignoresSafeArea(edges: .bottom) }
+                VStack(spacing: 0) {
+                    HStack {
+                        Button { exit = true } label: { Label(app.navigating ? "结束" : "返回", systemImage: "xmark").font(.subheadline.bold()).padding(10).background(Theme.background.opacity(0.95), in: Capsule()) }
+                        Spacer()
+                        if app.navigating {
+                            Text("\(Int(app.speed)) km/h").font(.subheadline.monospacedDigit()).padding(10)
+                                .background(Theme.background.opacity(0.95), in: Capsule())
+                        }
+                    }.padding(.horizontal, 16).padding(.top, 8)
+                    Spacer()
+                    if app.navigating {
+                        // Reserve a distinct bottom region for our panel. SDK turn cards,
+                        // map controls and touches outside this region remain available.
+                        ScrollView {
+                            VStack(spacing: 10) {
+                                LanePanel(rows: app.preview, live: app.liveLanes, status: app.previewStatus, count: $app.previewCount)
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(motion.g.valid ? String(format: "水平 %.2f g", motion.g.total) : "水平 G 值 --")
+                                            .font(.subheadline.bold()).monospacedDigit()
+                                        Text(motion.g.status).font(.caption2).foregroundStyle(Theme.muted)
+                                    }
+                                    Spacer()
+                                    Button("停车校准") { showCalibration = true }.font(.caption.bold()).buttonStyle(.bordered)
+                                }.padding(14).background(Theme.card, in: RoundedRectangle(cornerRadius: 16))
+                                Text(app.storageError.isEmpty ? app.diagnostics.reason : app.storageError)
+                                    .font(.caption2).foregroundStyle(Theme.amber)
+                            }
+                        }
+                        .frame(maxWidth: 420, maxHeight: min(geometry.size.height * 0.52, 500))
+                        .padding(.horizontal, 12).padding(.bottom, 12)
+                    } else {
+                        VStack(alignment: .leading, spacing: 14) {
+                            Text(app.arrived ? "已到达目的地" : "选择你的路线").font(.title2.bold())
+                            Text(app.message).font(.subheadline).foregroundStyle(Theme.muted)
+                            if app.planning { ProgressView().frame(maxWidth: .infinity) }
+                            ForEach(app.routes) { route in
+                                Button { app.chooseRoute(route.id) } label: {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text("\(Int(ceil(route.seconds / 60))) 分钟 · " + Theme.distance(route.meters)).font(.headline)
+                                            Text(route.label).font(.caption).foregroundStyle(Theme.muted)
+                                        }
+                                        Spacer()
+                                        Image(systemName: app.selectedRoute == route.id ? "checkmark.circle.fill" : "circle")
+                                    }
+                                    .foregroundStyle(.white).padding(14)
+                                    .background(app.selectedRoute == route.id ? Theme.lime.opacity(0.13) : Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
+                                }.disabled(app.starting || app.arrived)
+                            }
+                            if !app.arrived {
+                                PrimaryButton(title: app.starting ? "正在启动…" : app.plannedFromSpecifiedOrigin ? "从当前位置重新规划" : "开始 GPS 导航", icon: "location.north.fill") {
+                                    if app.plannedFromSpecifiedOrigin { app.plan() } else { app.startNavigation() }
+                                }.disabled(app.planning || app.starting || app.selectedRoute == nil)
+                            } else { PrimaryButton(title: "返回首页", icon: "house") { app.closeNavigation() } }
+                        }
+                        .padding(22).background(Theme.background, in: UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24))
+                    }
+                }
+            }
+        }
+        .confirmationDialog("结束导航并返回首页？", isPresented: $exit) {
+            Button("结束并返回", role: .destructive) { app.closeNavigation() }
+        }
+        .alert("停车后校准", isPresented: $showCalibration) {
+            Button("已停车，开始校准") { motion.calibrate() }
+            Button("取消", role: .cancel) {}
+        } message: { Text("固定手机，屏幕朝向车尾，顶部朝上。保持静止约 2 秒，行驶中请勿操作。") }
+    }
+}

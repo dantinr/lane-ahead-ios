@@ -1,0 +1,11 @@
+.build/
+build/
+Vendor/
+.local/
+LaneAhead/Resources/MapKeys.plist
+*.xcuserstate
+xcuserdata/
+.DS_Store
+artifacts/
+__pycache__/
+*.pyc

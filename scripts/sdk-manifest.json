@@ -1,0 +1,36 @@
+{
+  "source": "https://lbs.amap.com/api/ios-navi-sdk/download",
+  "retrieved": "2026-11-06",
+  "archives": [
+    {
+      "name": "navi",
+      "url": "https://a.amap.com/lbs/static/zip/AMap_iOS_Navi_Lib_V11.3.100.zip",
+      "sha256": "b6704b432c0b6f9618c8e60d5ac82123b1715ea601bf8e1e0432057836713930"
+    },
+    {
+      "name": "foundation-noidfa",
+      "url": "https://a.amap.com/lbs/static/zip/AMap_iOS_Foundation_NO_IDFA_Lib_V1.9.4.zip",
+      "sha256": "e812db2c83e2542e8bcd1d6904e03d49fa1a2e20b33772e1c3f1ede14d5dd552"
+    },
+    {
+      "name": "search",
+      "url": "https://a.amap.com/lbs/static/zip/AMap_iOS_Search_Lib_V9.8.1.zip",
+      "sha256": "d11e0b418319c74abf5228611f678b58130eac791e267d6d6e3e7ec9f41b2007"
+    },
+    {
+      "name": "navi-privacy",
+      "url": "https://a.amap.com/lbs/static/zip/AMapNaviKit.xcprivacy.zip",
+      "sha256": "16ed40f7fbf982ebc1302ecf858650575a659ba0c6ec18197a3472343266edd2"
+    },
+    {
+      "name": "search-privacy",
+      "url": "https://a.amap.com/lbs/static/zip/AMapSearchKit.xcprivacy.zip",
+      "sha256": "abbd5a0fa0ca13c2f2b9e247b549a03a55b66e5e8cade345f797c63ab99c24c3"
+    },
+    {
+      "name": "foundation-privacy",
+      "url": "https://a.amap.com/lbs/static/zip/AMapFoundationKit-NO-IDFA.xcprivacy.zip",
+      "sha256": "45d16718a40cc00d6845a6b8e2d98ec6793bf16df57cca75eac838dec6d15f6c"
+    }
+  ]
+}
