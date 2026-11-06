@@ -2,7 +2,17 @@
 
 LaneAhead 鸿蒙版的原生 iPhone 实现。SwiftUI 页面、高德 iOS 导航 SDK、Core Motion 驾驶工具与本机历史存储，最低支持 iOS 17。
 
-当前没有配置地图 Key。车道演示、驾驶工具与本地历史页面可运行；真实地图、地点搜索、选路及 GPS 导航的接入代码已编译通过，待配置 Key 后在真机联调。演示不写入真实历史。
+鸿蒙版仓库：[LaneAhead · HarmonyOS](https://github.com/dantinr/lane-ahead-harmony)。
+
+车道演示、驾驶工具与本地历史页面可独立运行；真实地图、地点搜索、选路及 GPS 导航需要配置本机 iOS Key 后在真机使用。接入代码已编译通过，实际服务与道路效果需分别联调验证。演示不写入真实历史。
+
+## 界面预览
+
+| 首页 | 车道演示 | 驾驶工具 |
+| :---: | :---: | :---: |
+| <img src="docs/images/home.png" alt="LaneAhead iOS 首页的首次使用引导与车道演示入口" width="260"> | <img src="docs/images/lane-preview-demo.png" alt="虚构路线的前方车道预览、推荐方向与缺失车道状态" width="260"> | <img src="docs/images/driving-tools.png" alt="驾驶 G 值与磁北指南针在模拟器中的传感器不可用状态" width="260"> |
+
+以上为 iOS 模拟器截图：首页展示首次使用引导，车道预览使用虚构演示数据，驾驶工具展示模拟器的传感器不可用状态。截图不包含真实定位、路线或历史记录。
 
 ## 功能
 
@@ -42,7 +52,7 @@ bash scripts/build.sh test       # Swift 纯逻辑测试
 默认包名：`com.laneahead.ios`。
 
 1. 在高德开放平台创建绑定该包名的 **iOS Key**，开通所需地图、搜索及导航服务。
-2. 把 Key 的 32 位文本保存到 `.local/gaode-ios`。不要使用鸿蒙 Key 或 Web 服务 Key。
+2. 把 Key 的 32 位文本保存到 `.local/k`，也兼容 `.local/gaode-ios`；两者存在时优先使用 `.local/k`。不要使用鸿蒙 Key 或 Web 服务 Key。
 3. 在 Xcode 的 Signing & Capabilities 中选择自己的 Team，或者将 Team ID 保存到 `.local/team-id`。
 4. 手机开启开发者模式、连接并信任 Mac。首次安装按系统提示信任开发者。
 

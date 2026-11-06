@@ -5,10 +5,12 @@ import plistlib
 import re
 
 root = Path(__file__).resolve().parent.parent
-source = root / '.local/gaode-ios'
+source = root / '.local/k'
+if not source.exists():
+    source = root / '.local/gaode-ios'
 key = source.read_text().strip() if source.exists() else ''
 if key and not re.fullmatch(r'[a-fA-F0-9]{32}', key):
-    raise SystemExit('Invalid iOS map key: .local/gaode-ios must contain exactly one 32-character key.')
+    raise SystemExit('Invalid iOS map key: ' + str(source.relative_to(root)) + ' must contain exactly one 32-character key.')
 output = root / 'LaneAhead/Resources/MapKeys.plist'
 data = plistlib.dumps({'AMapIOSKey': key})
 output.parent.mkdir(parents=True, exist_ok=True)
