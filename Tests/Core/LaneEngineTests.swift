@@ -123,6 +123,50 @@ final class LaneEngineTests: XCTestCase {
         XCTAssertEqual(e.diagnostics.received, 1); XCTAssertEqual(e.diagnostics.decoded, 0)
         XCTAssertEqual(e.diagnostics.accepted, 0); XCTAssertTrue(e.history.isEmpty)
     }
+    func testAdditionalSlotsExcludeCurrentAndKeepUnknownPointBeforeKnownHistory() {
+        let e = engine()
+        e.begin(history: [LaneObservation(key: point(2).key, recordedAt: now, road: "测试街", lanes: lanes)], at: now)
+        e.progress(route: "r", step: 0, remaining: 100, at: now, realtime: true)
+        e.receive(lanes, at: now)
+        let state = e.preview(count: 3, at: now)
+        XCTAssertEqual(state.rows.first?.source, .live)
+        XCTAssertEqual(state.upcoming.map { $0.point.index }, [1, 2])
+        XCTAssertEqual(state.upcoming.map(\.distance), [600, 1_100])
+        XCTAssertEqual(state.upcoming.map(\.source), [.unknown, .history])
+        XCTAssertTrue(state.upcoming[0].lanes.isEmpty)
+        XCTAssertEqual(state.upcoming[1].lanes, lanes)
+    }
+    func testAdditionalSlotsAdvanceAndNeverCopyThePreviousLiveLanes() {
+        let e = engine(); e.progress(route: "r", step: 0, remaining: 100, at: now, realtime: true)
+        e.receive(lanes, at: now)
+        e.progress(route: "r", step: 1, remaining: 400, at: now.addingTimeInterval(1), realtime: true)
+        let future = e.preview(count: 3, at: now.addingTimeInterval(1)).upcoming
+        XCTAssertEqual(future.map { $0.point.index }, [2])
+        XCTAssertEqual(future.first?.distance, 900)
+        XCTAssertTrue(future.allSatisfy { $0.lanes.isEmpty && $0.source == .unknown })
+    }
+    func testAdditionalSlotsClearForStalePositionWeakGPSAndReplan() {
+        let e = engine(); e.progress(route: "r", step: 0, remaining: 100, at: now, realtime: true)
+        XCTAssertEqual(e.preview(count: 3, at: now).upcoming.count, 2)
+        XCTAssertTrue(e.preview(count: 3, at: now.addingTimeInterval(16)).upcoming.isEmpty)
+        e.suspend("弱定位", at: now)
+        XCTAssertTrue(e.preview(count: 3, at: now).upcoming.isEmpty)
+        e.setRoute("r2", points: [point(), point(1)], at: now)
+        XCTAssertTrue(e.preview(count: 3, at: now).upcoming.isEmpty)
+        e.progress(route: "r", step: 0, remaining: 100, at: now, realtime: true)
+        XCTAssertTrue(e.preview(count: 3, at: now).upcoming.isEmpty)
+    }
+    func testAdditionalSlotsOmitDestinationAndPreserveHistoryMetadata() {
+        let e = engine(); var destination = point(2); destination.action = "到达终点"
+        let old = LaneObservation(key: point(1).key, recordedAt: now.addingTimeInterval(-100), road: "测试街", lanes: lanes)
+        e.begin(history: [old], at: now)
+        e.setRoute("r", points: [point(), point(1), destination], at: now)
+        e.progress(route: "r", step: 0, remaining: 100, at: now, realtime: true)
+        XCTAssertEqual(e.preview(count: 3, at: now).upcoming.map { $0.point.index }, [1])
+        XCTAssertEqual(e.preview(count: 3, at: now).upcoming.first?.observation, old)
+        e.progress(route: "r", step: 2, remaining: 10, at: now, realtime: true)
+        XCTAssertTrue(e.preview(count: 3, at: now).upcoming.isEmpty)
+    }
 }
 
 final class RouteAdapterTests: XCTestCase {

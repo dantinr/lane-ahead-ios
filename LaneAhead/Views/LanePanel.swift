@@ -29,77 +29,23 @@ struct LaneStrip: View {
     }
 }
 
-struct LanePanel: View {
-    var rows: [PreviewRow]
-    var live: [Lane] = []
-    var status: String
-    @Binding var count: Int
-    @State private var expanded = true
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Label("前方车道", systemImage: "arrow.triangle.branch").font(.system(.headline, design: .rounded, weight: .black))
-                Spacer()
-                if expanded {
-                    Button("\(count) 个") { count = count == 3 ? 2 : 3 }.font(.caption.bold())
-                        .buttonStyle(PopButtonStyle(fill: Theme.cyan, compact: true))
-                }
-                Button { expanded.toggle() } label: { Image(systemName: expanded ? "chevron.up" : "chevron.down") }
-                    .foregroundStyle(Theme.ink)
-                    .accessibilityLabel(expanded ? "收起车道面板" : "展开车道面板")
-            }
-            if expanded {
-                ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
-                    VStack(alignment: .leading, spacing: 7) {
-                        HStack {
-                            Text("\(index + 1)").font(.caption.bold()).foregroundStyle(Theme.ink)
-                                .frame(width: 24, height: 24).background(Theme.yellow, in: Circle())
-                                .overlay { Circle().strokeBorder(Theme.ink, lineWidth: 1.5) }
-                            Text(Theme.distance(row.distance) + " · " + row.point.action).font(.subheadline.bold())
-                            Spacer(minLength: 2)
-                            Text(row.source.rawValue).font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(row.source == .history ? Theme.amber : row.source == .live ? Theme.accent : Theme.muted)
-                        }
-                        Text(row.point.road).font(.caption).foregroundStyle(Theme.muted).lineLimit(1)
-                        if let observation = row.observation {
-                            HStack(spacing: 4) {
-                                Text("观测于"); Text(observation.recordedAt, format: .dateTime.year().month().day())
-                                if observation.needsRefresh(at: Date()) { Text("· 待更新") }
-                            }.font(.caption2).foregroundStyle(Theme.amber)
-                        }
-                        if row.lanes.isEmpty { Text("暂无车道数据").font(.caption).foregroundStyle(Theme.muted).padding(.vertical, 5) }
-                        else { LaneStrip(lanes: row.lanes, history: row.source == .history) }
-                    }
-                    if index < rows.count - 1 { Divider().overlay(Theme.muted.opacity(0.2)) }
-                }
-                if !live.isEmpty {
-                    Text("当前实时车道 · 未关联引导点").font(.caption2).foregroundStyle(Theme.muted)
-                    LaneStrip(lanes: live)
-                }
-                Text(status).font(.caption2).foregroundStyle(Theme.muted).fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(17).popSurface()
-    }
-}
-
 struct DemoView: View {
     @State private var traveled = 0.0
-    @State private var count = 3
     @State private var missing = false
     @State private var playing = false
     @Environment(\.scenePhase) private var phase
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 14) {
                 HStack {
                     Text("先看清，再选道。").font(.system(.title2, design: .rounded, weight: .black))
                     Spacer(); PopBadge(title: "虚构演示", fill: Theme.pink).rotationEffect(.degrees(3))
                 }
                 Text("这是一条虚构路线，不代表真实道路，也不会写入车道或导航历史。")
                     .font(.subheadline).foregroundStyle(Theme.muted)
-                LanePanel(rows: DemoScenario.rows(traveled: traveled, count: count, missing: missing),
-                    status: traveled >= 1_650 ? "演示引导点已通过" : "虚构路线 · 车道由左向右排列", count: $count)
+                LaneLayoutDemo(rows: DemoScenario.rows(traveled: traveled, count: 3, missing: missing))
+                Text("保留当前提示，下面再看两处。未来车道有匹配历史才显示；没有数据时保留提示位。")
+                    .font(.caption).foregroundStyle(Theme.muted)
                 Card(fill: Theme.cyan) {
                     HStack { Text("路线进度").font(.headline); Spacer(); Text(Theme.distance(traveled)).monospacedDigit().foregroundStyle(Theme.accent) }
                     Slider(value: $traveled, in: 0...DemoScenario.total).accessibilityLabel("演示路线进度")

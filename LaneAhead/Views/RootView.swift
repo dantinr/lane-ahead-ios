@@ -48,7 +48,7 @@ struct HomeView: View {
                             PopBadge(title: "向前看！", fill: Theme.pink).rotationEffect(.degrees(-4))
                             Text("下一路口，\n早有准备。").font(.system(size: 33, weight: .black, design: .rounded))
                                 .lineSpacing(3).fixedSize(horizontal: false, vertical: true)
-                            Text("前方 2–3 个引导点\n实时车道 · 历史参考")
+                            Text("当前 + 后续两个引导点\n实时车道 · 历史参考")
                                 .font(.system(size: 12, weight: .semibold)).lineSpacing(3)
                         }.foregroundStyle(Theme.ink).padding(22)
                     }
@@ -84,19 +84,6 @@ struct HomeView: View {
                     Text(app.locationStatus).font(.caption).foregroundStyle(Theme.muted)
                     PrimaryButton(title: "选择路线", icon: "point.topleft.down.to.point.bottomright.curvepath") { app.plan() }.disabled(!app.canNavigate)
                 }
-                NavigationLink { DemoView() } label: {
-                    HStack(spacing: 15) {
-                        Image(systemName: "arrow.triangle.branch").font(.title2.bold()).foregroundStyle(Theme.ink)
-                            .frame(width: 46, height: 46).background(Theme.yellow, in: Circle())
-                            .overlay { Circle().strokeBorder(Theme.ink, lineWidth: 2) }.rotationEffect(.degrees(-8))
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("体验前方车道").font(.system(.headline, design: .rounded, weight: .black)).foregroundStyle(Theme.ink)
-                            Text("虚构路线演示 · 无需定位").font(.caption).foregroundStyle(Theme.ink)
-                        }
-                        Spacer(); Image(systemName: "arrow.up.right").font(.title3.bold()).foregroundStyle(Theme.ink)
-                    }.padding(18).popSurface(Theme.pink)
-                }
-                .accessibilityIdentifier("home.demo")
                 if !app.message.isEmpty { Text(app.message).font(.footnote).foregroundStyle(Theme.amber) }
                 if !app.storageError.isEmpty { Text(app.storageError).font(.footnote).foregroundStyle(Theme.amber) }
                 Text("车道提示仅覆盖导航引导点。历史记录仅供参考，以实际道路标线为准。")
@@ -122,7 +109,7 @@ struct SettingsView: View {
                 Text("车道记录在本机长期保存，满 3 个月标记待更新；再次收到有效车道时更新观测时间。")
                     .font(.footnote).foregroundStyle(.secondary)
                 NavigationLink("指定起点规划") { SpecifiedRouteView() }.disabled(!app.ready)
-                NavigationLink("车道演示") { DemoView() }
+                NavigationLink("车道演示") { DemoView() }.accessibilityIdentifier("settings.demo")
             }
             Section("本机数据") {
                 Button("清除车道历史", role: .destructive) { clearing = "lanes" }

@@ -22,6 +22,7 @@ final class AppModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published private(set) var navigating = false
     @Published private(set) var arrived = false
     @Published private(set) var preview: [PreviewRow] = []
+    @Published private(set) var upcomingLanes: [PreviewRow] = []
     @Published private(set) var liveLanes: [Lane] = []
     @Published private(set) var previewStatus = "等待导航"
     @Published private(set) var diagnostics = Diagnostics()
@@ -29,7 +30,6 @@ final class AppModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published private(set) var seconds = 0.0
     @Published private(set) var speed = 0.0
     @Published private(set) var plannedFromSpecifiedOrigin = false
-    @Published var previewCount = 3 { didSet { publish() } }
     let motion = MotionService()
     let repository: LocalRepository
     private(set) var map: LAMapBridge?
@@ -166,7 +166,7 @@ final class AppModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         plannedFromSpecifiedOrigin = start != nil
         engine = LaneEngine(); engine.begin(history: snapshot.lanes, at: Date())
         routes = []; selectedRoute = nil; arrived = false; planning = true; starting = false; trip = nil
-        preview = []; liveLanes = []; message = "正在规划路线…"; showNavigation = true; homeVisibility(false)
+        preview = []; upcomingLanes = []; liveLanes = []; message = "正在规划路线…"; showNavigation = true; homeVisibility(false)
         let bridge = LANavigationBridge()
         navigation = bridge
         bridge.eventHandler = { [weak self] event, values in
@@ -266,8 +266,9 @@ final class AppModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         publish()
     }
     func publish() {
-        let state = engine.preview(count: previewCount, at: Date())
-        preview = state.rows; liveLanes = state.live; previewStatus = state.status; diagnostics = engine.diagnostics
+        let state = engine.preview(count: 3, at: Date())
+        preview = state.rows; upcomingLanes = state.upcoming
+        liveLanes = state.live; previewStatus = state.status; diagnostics = engine.diagnostics
     }
     private func flushLanes() {
         guard !pending.isEmpty, !saving else { return }

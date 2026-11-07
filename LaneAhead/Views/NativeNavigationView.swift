@@ -10,6 +10,10 @@ struct NativeNavigationView: View {
             ZStack {
                 Theme.background.ignoresSafeArea()
                 if let navigation = app.navigation { ServiceMap(view: navigation.view).ignoresSafeArea(edges: .bottom) }
+                if app.navigating {
+                    NavigationLaneOverlay(rows: app.upcomingLanes, waiting: app.preview.isEmpty && app.previewStatus != "即将到达终点",
+                        status: app.previewStatus)
+                }
                 VStack(spacing: 0) {
                     HStack {
                         Button { exit = true } label: { Label(app.navigating ? "结束" : "返回", systemImage: "xmark").font(.subheadline.bold()) }
@@ -22,27 +26,23 @@ struct NativeNavigationView: View {
                     }.padding(.horizontal, 16).padding(.top, 8)
                     Spacer()
                     if app.navigating {
-                        // Reserve a distinct bottom region for our panel. SDK turn cards,
-                        // map controls and touches outside this region remain available.
-                        ScrollView {
-                            VStack(spacing: 10) {
-                                LanePanel(rows: app.preview, live: app.liveLanes, status: app.previewStatus, count: $app.previewCount)
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(motion.g.valid ? String(format: "水平 %.2f g", motion.g.total) : "水平 G 值 --")
-                                            .font(.subheadline.bold()).monospacedDigit()
-                                        Text(motion.g.status).font(.caption2).foregroundStyle(Theme.muted)
-                                    }
-                                    Spacer()
-                                    Button("停车校准") { showCalibration = true }.font(.caption.bold())
-                                        .buttonStyle(PopButtonStyle(fill: Theme.yellow, compact: true))
-                                }.padding(14).popSurface(Theme.card, radius: 16, shadow: 3)
-                                Text(app.storageError.isEmpty ? app.diagnostics.reason : app.storageError)
-                                    .font(.caption2).foregroundStyle(Theme.amber)
+                        VStack(spacing: 6) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(motion.g.valid ? String(format: "水平 %.2f g", motion.g.total) : "水平 G 值 --")
+                                        .font(.caption.bold()).monospacedDigit()
+                                    Text(motion.g.status).font(.system(size: 10)).foregroundStyle(Theme.muted).lineLimit(1)
+                                }
+                                Spacer()
+                                Button("停车校准") { showCalibration = true }.font(.caption.bold())
+                                    .buttonStyle(PopButtonStyle(fill: Theme.yellow, compact: true))
+                            }.padding(.horizontal, 10).padding(.vertical, 5).popSurface(Theme.card, radius: 12, shadow: 2)
+                            if !app.storageError.isEmpty {
+                                Text(app.storageError).font(.caption2).foregroundStyle(Theme.amber)
                             }
                         }
-                        .frame(maxWidth: 420, maxHeight: min(geometry.size.height * 0.52, 500))
-                        .padding(.horizontal, 12).padding(.bottom, 12)
+                        .frame(maxWidth: geometry.size.width > geometry.size.height ? 260 : 310)
+                        .padding(.horizontal, 12).padding(.bottom, 108)
                     } else {
                         VStack(alignment: .leading, spacing: 14) {
                             Text(app.arrived ? "已到达目的地" : "选择你的路线").font(.title2.bold())

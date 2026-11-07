@@ -107,9 +107,9 @@ final class LaneEngine {
     }
     func finish(at now: Date) { suspend("导航已结束", at: now); diagnostics.endedAt = now }
 
-    func preview(count: Int, at now: Date) -> (rows: [PreviewRow], live: [Lane], status: String) {
+    func preview(count: Int, at now: Date) -> (rows: [PreviewRow], upcoming: [PreviewRow], live: [Lane], status: String) {
         guard suspended.isEmpty, let positionAt, (0...15).contains(now.timeIntervalSince(positionAt)) else {
-            return ([], [], suspended.isEmpty ? "定位更新中，暂不提示车道" : suspended)
+            return ([], [], [], suspended.isEmpty ? "定位更新中，暂不提示车道" : suspended)
         }
         let fresh = liveAt.map { (0...15).contains(now.timeIntervalSince($0)) } ?? false
         let rows = points.filter { $0.index >= step && $0.action != "到达终点" }.prefix(count == 2 ? 2 : 3).map { point in
@@ -122,7 +122,9 @@ final class LaneEngine {
             }
             return PreviewRow(point: point, distance: distance, lanes: [], source: .unknown)
         }
-        return (rows, fresh && !rows.contains(where: { $0.source == .live }) ? live : [],
+        // The SDK owns the current lane strip. Extra slots must only contain later
+        // guidance points, including unknown ones, so gaps never shift their order.
+        return (rows, rows.filter { $0.point.index > step }, fresh && !rows.contains(where: { $0.source == .live }) ? live : [],
             rows.isEmpty ? "即将到达终点" : "仅覆盖导航引导点，部分直行路口可能缺失")
     }
 }
