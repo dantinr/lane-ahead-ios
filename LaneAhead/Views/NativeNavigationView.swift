@@ -3,7 +3,6 @@ import SwiftUI
 struct NativeNavigationView: View {
     @EnvironmentObject private var app: AppModel
     @EnvironmentObject private var motion: MotionService
-    @State private var exit = false
     @State private var showCalibration = false
     var body: some View {
         GeometryReader { geometry in
@@ -13,20 +12,19 @@ struct NativeNavigationView: View {
                 if app.navigating {
                     NavigationLaneOverlay(rows: app.upcomingLanes, waiting: app.preview.isEmpty && app.previewStatus != "即将到达终点",
                         status: app.previewStatus)
+                    NavigationSpeedGauge(speed: app.speed)
+                        .position(x: geometry.size.width - 50,
+                            y: geometry.size.width > geometry.size.height ? 70 : 116)
+                        .allowsHitTesting(false)
                 }
                 VStack(spacing: 0) {
-                    HStack {
-                        Button {
-                            if app.navigating { exit = true }
-                            else { app.closeNavigation() }
-                        } label: { Label(app.navigating ? "结束" : "返回", systemImage: "xmark").font(.subheadline.bold()) }
-                            .buttonStyle(PopButtonStyle(fill: Theme.card, compact: true))
-                        Spacer()
-                        if app.navigating {
-                            Text("\(Int(app.speed)) km/h").font(.subheadline.bold().monospacedDigit()).padding(10)
-                                .popSurface(Theme.yellow, radius: 12, shadow: 3)
-                        }
-                    }.padding(.horizontal, 16).padding(.top, 8)
+                    if !app.navigating {
+                        HStack {
+                            Button { app.closeNavigation() } label: { Label("返回", systemImage: "xmark").font(.subheadline.bold()) }
+                                .buttonStyle(PopButtonStyle(fill: Theme.card, compact: true))
+                            Spacer()
+                        }.padding(.horizontal, 16).padding(.top, 8)
+                    }
                     Spacer()
                     if app.navigating {
                         VStack(spacing: 6) {
@@ -77,12 +75,31 @@ struct NativeNavigationView: View {
                 }
             }
         }
-        .confirmationDialog("结束导航并返回首页？", isPresented: $exit) {
-            Button("结束并返回", role: .destructive) { app.closeNavigation() }
-        }
         .alert("停车后校准", isPresented: $showCalibration) {
             Button("已停车，开始校准") { motion.calibrate() }
             Button("取消", role: .cancel) {}
         } message: { Text("固定手机，屏幕朝向车尾，顶部朝上。保持静止约 2 秒，行驶中请勿操作。") }
+    }
+}
+
+struct NavigationSpeedGauge: View {
+    var speed: Double
+    private var reading: String {
+        speed.isFinite && speed >= 0 ? String(format: "%.0f", speed.rounded(.towardZero)) : "--"
+    }
+    var body: some View {
+        VStack(spacing: 0) {
+            Text(reading).font(.system(size: 24, weight: .black, design: .rounded)).monospacedDigit()
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text("km/h").font(.system(size: 10, weight: .bold))
+        }
+        .foregroundStyle(Theme.ink).frame(width: 66, height: 66)
+        .background {
+            Circle().fill(Theme.yellow).shadow(color: Theme.ink, radius: 0, x: 2, y: 3)
+        }
+        .overlay { Circle().strokeBorder(Theme.ink, lineWidth: 2) }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("当前时速")
+        .accessibilityValue(reading == "--" ? "未知" : reading + " 公里每小时")
     }
 }
