@@ -7,6 +7,7 @@ let package = Package(
     products: [.library(name: "LaneAheadCore", targets: ["LaneAheadCore"])],
     targets: [
         .target(name: "LaneAheadCore", path: "LaneAhead/Core"),
-        .testTarget(name: "LaneAheadCoreTests", dependencies: ["LaneAheadCore"], path: "Tests/Core")
+        .target(name: "LANavigationPayload", path: "LaneAhead/Bridge/RoutePayload", publicHeadersPath: "."),
+        .testTarget(name: "LaneAheadCoreTests", dependencies: ["LaneAheadCore", "LANavigationPayload"], path: "Tests/Core")
     ]
 )

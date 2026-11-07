@@ -1,6 +1,6 @@
 # 功能对照与验证范围
 
-对照源：本机 `lane-ahead-harmony` 0.0.32；iOS 工程版本 0.1.0。当前无高德 iOS Key。
+对照源：本机 `lane-ahead-harmony` 0.0.32；初始 iOS 工程版本 0.1.0。初始验证时无高德 iOS Key，后续版本的验证进展见下文。
 
 | 鸿蒙功能 | iOS 实现 | 当前验证 |
 | --- | --- | --- |
@@ -69,6 +69,14 @@ Core Motion 的 `userAcceleration` 单位为 g，转换为 m/s² 后进入 G 值
 两项既有 XCUITest 在新主题下通过，覆盖车道数量切换、缺失状态、工具与历史入口；人工检查首页、演示与工具页截图的文字和对比度。模拟器与真机签名构建通过。README 的三张截图已同步更新。未修改车道、搜索或传感器计算规则，也未将界面验证等同于真实道路验证。
 
 本次界面结果位于 `build/PopFinalUIValidation.xcresult`，构建日志位于本机 `/private/tmp/lane-ios-pop-*.log`。
+
+## 0.1.2 路线桥接类型修复
+
+设备回读发现真实导航已收到车道回调，但未通过路线关联。根因是接入层把 `formWay == AMapNaviFormWayInternalRoad` 的 C 整数比较结果直接装入 NSNumber，JSON 中产生数字 `0/1`，而 Swift `RouteLink.internalRoad` 要求布尔 `false/true`，使整个分段数组解码失败。格式错误使引导点无法进入车道引擎，后续位置及采集被拦截。
+
+使用共享 Foundation 编码函数 `LAEncodeRouteLink` 的 BOOL 参数修复生产端类型，保持 Swift 解码和路口匹配规则严格。Swift Package 增加纯 Foundation 的 Objective-C target，回归测试直接调用 App 使用的编码函数，覆盖四种信号灯与内部道路布尔组合、非法数字标志拒绝，以及编码、Swift 解码、路线构建和立即采集的完整链路。样本均为构造数据，不写入手机。
+
+56 项核心测试、模拟器构建和真机签名构建通过，修复版已安装并启动。设备原有历史及诊断均通过应用模型校验，更新前后文件逐字节一致；未创建新导航或补录车道。真实采集与再次经过的复用仍待修复后的实际行驶核验。原始设备数据与具体行程只保留在本机被忽略的 artifacts 目录。
 
 ## 官方接口依据
 

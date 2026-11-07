@@ -1,4 +1,5 @@
 #import "LABridge.h"
+#import "RoutePayload/LARoutePayload.h"
 #import <TargetConditionals.h>
 
 #if TARGET_OS_SIMULATOR
@@ -228,8 +229,8 @@
     [route.routeSegments enumerateObjectsUsingBlock:^(AMapNaviSegment *segment, NSUInteger index, BOOL *stop) {
         NSMutableArray *links = [NSMutableArray new];
         for (AMapNaviLink *link in segment.links) {
-            [links addObject:@{@"length": @(link.length), @"road": link.roadName ?: @"", @"signal": @(link.isHadTrafficLights),
-                @"internalRoad": @(link.formWay == AMapNaviFormWayInternalRoad), @"coordinates": [self coordinates:link.coordinates]}];
+            [links addObject:LAEncodeRouteLink(link.length, link.roadName ?: @"", link.isHadTrafficLights,
+                link.formWay == AMapNaviFormWayInternalRoad, [self coordinates:link.coordinates])];
         }
         [segments addObject:@{@"index": @(index), @"length": @(segment.length), @"icon": @(segment.iconType),
             @"signals": @(segment.trafficLightCount), @"coordinates": [self coordinates:segment.coordinates], @"links": links}];

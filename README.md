@@ -80,7 +80,9 @@ xcodebuild -project LaneAhead.xcodeproj -scheme LaneAhead \
   CODE_SIGNING_ALLOWED=NO -only-testing:LaneAheadUITests test
 ```
 
-尚未验证：Key 鉴权、真实地点请求、实际道路导航、未来车道覆盖与匹配、重复行驶历史复用、锁屏和后台持续导航、传感器绝对精度。测试样本不代表实车结果。详细对照见 [功能与验证](docs/parity-and-validation.md)。
+2026-11-07：设备回读已确认有真实导航记录与实时车道回调。0.1.2 修复路线桥接中数字与布尔值类型不一致、导致路线解码失败的问题；新增 Objective-C 到 Swift 的跨语言回归测试，56 项核心测试通过，模拟器和真机签名构建通过，已安装并启动。更新前后本机历史与诊断文件逐字节一致。
+
+仍待验证：修复版的实际车道采集、未来车道覆盖与匹配、重复行驶历史复用、锁屏和后台持续导航、传感器绝对精度。测试样本不代表实车结果。详细对照见 [功能与验证](docs/parity-and-validation.md)。
 
 ## 代码入口
 
