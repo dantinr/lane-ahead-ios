@@ -23,6 +23,7 @@ struct HomeView: View {
     @EnvironmentObject private var app: AppModel
     @State private var search = false
     @State private var settings = false
+    @State private var selectedSearchPlace: Place?
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -93,7 +94,15 @@ struct HomeView: View {
         .background(Theme.background).toolbar(.hidden, for: .navigationBar)
         .onAppear { app.homeVisibility(true); if app.consent { app.initializeMap() } }
         .onDisappear { app.homeVisibility(false) }
-        .sheet(isPresented: $search, onDismiss: { app.homeVisibility(true) }) { NavigationStack { DestinationSearchView() } }
+        .sheet(isPresented: $search, onDismiss: {
+            app.homeVisibility(true)
+            guard let place = selectedSearchPlace else { return }
+            selectedSearchPlace = nil
+            app.select(place)
+            app.plan()
+        }) {
+            NavigationStack { DestinationSearchView(onSelect: { selectedSearchPlace = $0 }) }
+        }
         .sheet(isPresented: $settings) { NavigationStack { SettingsView() } }
     }
 }

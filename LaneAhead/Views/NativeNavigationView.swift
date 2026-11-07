@@ -16,7 +16,10 @@ struct NativeNavigationView: View {
                 }
                 VStack(spacing: 0) {
                     HStack {
-                        Button { exit = true } label: { Label(app.navigating ? "结束" : "返回", systemImage: "xmark").font(.subheadline.bold()) }
+                        Button {
+                            if app.navigating { exit = true }
+                            else { app.closeNavigation() }
+                        } label: { Label(app.navigating ? "结束" : "返回", systemImage: "xmark").font(.subheadline.bold()) }
                             .buttonStyle(PopButtonStyle(fill: Theme.card, compact: true))
                         Spacer()
                         if app.navigating {
